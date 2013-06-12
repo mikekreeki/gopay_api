@@ -19,26 +19,40 @@ module GoPay
   end
 
   def self.configure_from_yaml(path)
+    # TODO
     yaml = YAML.load_file(path)
     return unless yaml
-    configuration.goid = yaml["goid"]
-    configuration.success_url = yaml["success_url"]
-    configuration.failed_url = yaml["failed_url"]
-    configuration.secure_key = yaml["secure_key"]
-    return configuration
+    configure_from_hash(yaml)
+  end
+
+  def self.configure_from_hash(hash)
+    configuration.tap do |configuration|
+      configuration.goid        = hash["goid"]
+      configuration.success_url = hash["success_url"]
+      configuration.failed_url  = hash["failed_url"]
+      configuration.secure_key  = hash["secure_key"]
+    end
   end
 
   def self.configure_from_rails
     path = ::Rails.root.join("config", "gopay.yml")
-    configure_from_yaml(path) if File.exists?(path)
-    env = if defined?(::Rails) && ::Rails.respond_to?(:env)
-            ::Rails.env.to_sym
-          elsif defined?(::RAILS_ENV)
-            ::RAILS_ENV.to_sym
-          end
-    configuration.environment ||= (env == :development) ? :test : env
-    warn "GoPay wasnt properly configured." if GoPay.configuration.goid.blank?
-    configuration
+    if File.exists?(path)
+      yaml = YAML.load_file(path)
+
+      env = if defined?(::Rails) && ::Rails.respond_to?(:env)
+        ::Rails.env.to_sym
+      elsif defined?(::RAILS_ENV)
+        ::RAILS_ENV.to_sym
+      end
+
+      hash = yaml['goid'] ? yaml : yaml[env.to_s]
+      configure_from_hash(hash)
+
+      configuration.environment ||= (env == :development) ? :test : env
+
+      warn "GoPay wasnt properly configured." if GoPay.configuration.goid.blank?
+      configuration
+    end
   end
 
   class Configuration
