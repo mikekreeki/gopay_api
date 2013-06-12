@@ -27,6 +27,7 @@ module GoPay
 
   def self.configure_from_hash(hash)
     configuration.tap do |configuration|
+      configuration.environment = hash['environment']
       configuration.goid        = hash["goid"]
       configuration.success_url = hash["success_url"]
       configuration.failed_url  = hash["failed_url"]
