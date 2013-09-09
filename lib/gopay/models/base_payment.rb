@@ -18,7 +18,7 @@ module GoPay
                 :order_number, :payment_channels, :default_payment_channel, :secure_key,
                 :first_name, :last_name, :city, :street, :postal_code, :country_code,
                 :email, :phone_number, :p1, :p2, :p3, :p4, :lang,
-                :session_state
+                :session_state, :success_url, :failed_url
 
     attr_accessor :payment_session_id, :response
 
@@ -51,8 +51,8 @@ module GoPay
        "totalPrice" => total_price_in_cents,
        "currency" => currency,
        "orderNumber" => order_number,
-       "successURL" => GoPay.configuration.success_url,
-       "failedURL" => GoPay.configuration.failed_url,
+       "successURL" => success_url || GoPay.configuration.success_url,
+       "failedURL" => failed_url || GoPay.configuration.failed_url,
        "preAuthorization" => false,
        "defaultPaymentChannel" => default_payment_channel,
        "recurrentPayment" => false,
@@ -129,8 +129,8 @@ module GoPay
        total_price_in_cents,
        currency,
        order_number,
-       GoPay.configuration.failed_url,
-       GoPay.configuration.success_url,
+       (failed_url || GoPay.configuration.failed_url),
+       (success_url || GoPay.configuration.success_url),
        0, #preAuthorization
        0, #recurrentPayment
        nil, #recurrenceDateTo
